@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoBuild - แอปสายปั้น</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen pb-10">
+
+    <header class="bg-slate-800 p-4 shadow-lg text-center border-b border-orange-500">
+        <h1 class="text-2xl font-bold text-orange-500 tracking-wider">🛠️ MotoBuild</h1>
+        <p class="text-xs text-slate-400 mt-1">แอปพลิเคชันสำหรับสายปั้นและแต่งรถ</p>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-700">
+            <h2 class="text-lg font-semibold text-orange-400 mb-4 flex items-center gap-2">
+                ⚙️ คำนวณสเปคเครื่องยนต์
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">ขนาดลูกสูบ (มิลลิเมตร)</label>
+                    <input type="number" id="piston" placeholder="เช่น 56, 59" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">ระยะชัก (มิลลิเมตร)</label>
+                    <input type="number" id="stroke" placeholder="เช่น 57.9" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-orange-500">
+                </div>
+                <button onclick="calculateCC()" class="w-full bg-orange-500 hover:bg-orange-600 font-semibold p-3 rounded-xl transition duration-200 cursor-pointer text-slate-900 font-bold">
+                    คำนวณ CC
+                </button>
+                
+                <div id="cc-result-box" class="hidden bg-slate-900 p-4 rounded-xl text-center border border-dashed border-slate-700">
+                    <span class="text-sm text-slate-400 block">ความจุเครื่องยนต์สุทธิ</span>
+                    <span id="cc-result" class="text-2xl font-bold text-emerald-400">0.00</span> <span class="text-emerald-400 font-semibold">cc</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-700">
+            <h2 class="text-lg font-semibold text-orange-400 mb-4 flex items-center gap-2">
+                📝 รายการอะไหล่ & งบประมาณ
+            </h2>
+            
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="part-name" placeholder="ชื่ออะไหล่" class="flex-2 bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm focus:outline-none focus:border-orange-500">
+                <input type="number" id="part-price" placeholder="ราคา" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm focus:outline-none focus:border-orange-500">
+                <button onclick="addPart()" class="bg-emerald-500 hover:bg-emerald-600 px-4 rounded-xl font-bold transition cursor-pointer text-slate-900">+</button>
+            </div>
+
+            <ul id="part-list" class="space-y-2 max-h-52 overflow-y-auto mb-4 pr-1">
+                <li class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-700 text-sm">
+                    <span class="text-slate-300">📌 ตัวอย่าง: ลูกสูบแต่ง</span>
+                    <span class="text-orange-400 font-semibold">1,200 บ.</span>
+                </li>
+            </ul>
+
+            <div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center border border-slate-700">
+                <span class="text-sm text-slate-400">งบประมาณรวมทั้งหมด:</span>
+                <span id="total-budget" class="text-lg font-bold text-orange-400">1,200 บ.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // รายการอะไหล่เริ่มต้นเพื่อเป็นตัวอย่าง
+        let parts = [{ name: 'ตัวอย่าง: ลูกสูบแต่ง', price: 1200 }];
+
+        // 1. ฟังก์ชันคำนวณ CC เครื่องยนต์
+        function calculateCC() {
+            const piston = parseFloat(document.getElementById('piston').value);
+            const stroke = parseFloat(document.getElementById('stroke').value);
+            
+            if (!piston || !stroke) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วนครับ');
+                return;
+            }
+
+            // สูตรคำนวณ: (3.1416 * (ความโตลูกสูบ/2)^2 * ระยะชัก) / 1000
+            const radius = piston / 2;
+            const cc = (Math.PI * Math.pow(radius, 2) * stroke) / 1000;
+
+            // แสดงผลลัพธ์
+            document.getElementById('cc-result').innerText = cc.toFixed(2);
+            document.getElementById('cc-result-box').classList.remove('hidden');
+        }
+
+        // 2. ฟังก์ชันแสดงรายการอะไหล่และคำนวณงบรวม
+        function updatePartList() {
+            const listElement = document.getElementById('part-list');
+            const totalElement = document.getElementById('total-budget');
+            
+            listElement.innerHTML = '';
+            let total = 0;
+
+            parts.forEach((part, index) => {
+                total += part.price;
+                listElement.innerHTML += `
+                    <li class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-700 text-sm">
+                        <span class="text-slate-300">📌 ${part.name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-orange-400 font-semibold">${part.price.toLocaleString()} บ.</span>
+                            <button onclick="removePart(${index})" class="text-red-400 hover:text-red-500 font-bold text-xs cursor-pointer">ลบ</button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            totalElement.innerText = total.toLocaleString() + ' บ.';
+        }
+
+        // 3. ฟังก์ชันเพิ่มอะไหล่ใหม่
+        function addPart() {
+            const nameInput = document.getElementById('part-name');
+            const priceInput = document.getElementById('part-price');
+            
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value);
+
+            if (!name || !price) {
+                alert('กรุณากรอกทั้งชื่ออะไหล่และราคานะครับ');
+                return;
+            }
+
+            parts.push({ name: name, price: price });
+            
+            // ล้างช่องกรอกข้อมูลหลังกดเพิ่ม
+            nameInput.value = '';
+            priceInput.value = '';
+            
+            updatePartList();
+        }
+
+        // 4. ฟังก์ชันลบอะไหล่
+        function removePart(index) {
+            parts.splice(index, 1);
+            updatePartList();
+        }
+    </script>
+</body>
+</html>
